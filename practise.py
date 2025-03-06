@@ -1,97 +1,70 @@
-import flet as ft
-# from assets import sof
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
 
-class CapturingPage(ft.Column):
-    def __init__(self, page):
-        super().__init__()
-        self.page = page
-        self.steps = 1
+data = {
+    1: {'title': 'Click "document"', 'description': 'Perform the action to proceed.', 'screenshot_path': r'C:\Path\to\screenshot_1.png'},
+    2: {'title': 'Open Menu', 'description': 'Access additional options.', 'screenshot_path': r'C:\Path\to\screenshot_2.png'},
+}
+
+file_name = 'styled_output.pdf'
+pdf = canvas.Canvas(file_name, pagesize=letter)
+
+page_width, page_height = letter
+y_position = page_height - 80  # Start a bit lower
+
+for step, value in data.items():
+    title = value.get('title', 'No Title')
+    description = value.get('description', 'No Description')
+    screenshot_path = value.get('screenshot_path', '')
+
+    container_width = page_width - 100  
+    container_height = 50  
+    pdf.setFillColorRGB(0.094, 1, 0)  
+    pdf.roundRect(50, y_position - container_height, container_width, container_height, 10, fill=1, stroke=0)
+
+    circle_x = 80
+    circle_y = y_position - (container_height/2)
+    circle_radius = 15
+    pdf.setFillColor(colors.white)  
+    pdf.circle(circle_x, circle_y, circle_radius, fill=1, stroke=0)
     
-  
-    def step_details(self):
-        return ft.Container(
-            content=ft.Column([
-                ft.Text(f"Number of steps: {self.steps}"),
-                ft.Container(
-                    content=ft.Column([
-                        ft.Container(
-                            content=ft.Text("Latest step details", weight=ft.FontWeight.BOLD),
-                            bgcolor=ft.Colors.WHITE,
-                            padding=10,
-                            border_radius=5
-                        ),
-                        ft.Container(
-                            content=ft.Image(
-                                src=f"assets/software-update-1.png",
-                                width=200,
-                                height=150,
-                                fit=ft.ImageFit.CONTAIN,
-                            ),
-                            padding=10
-                        ),
-                        ft.Text("Click \"Desktop\"", size=16),
-                        ft.Container(
-                            content=ft.TextField(
-                                label="Step Description",
-                                multiline=True,
-                                min_lines=2
-                            ),
-                            padding=10
-                        )
-                    ]),
-                    bgcolor=ft.Colors.WHITE,
-                    border_radius=10,
-                    border=ft.border.all(1, "black"),
-                    padding=20
-                )
-            ])
-        )
+    pdf.setFillColor(colors.black)
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawCentredString(circle_x, circle_y - 5, str(step))
 
-    def action_buttons(self):
-        return ft.Row([
-            ft.OutlinedButton(
-                "Pause",
-                icon=ft.Icons.PAUSE,
-                style=ft.ButtonStyle(
-                    shape=ft.RoundedRectangleBorder(radius=10),
-                    padding=20
-                )
-            ),
-            ft.ElevatedButton(
-                "Finish",
-                icon=ft.Icons.CHECK,
-                style=ft.ButtonStyle(
-                    shape=ft.RoundedRectangleBorder(radius=10),
-                    bgcolor=ft.Colors.GREEN,
-                    color=ft.Colors.WHITE,
-                    padding=20
-                ),
-                # on_click=self.main_instance_function_back
-            )
-        ], alignment=ft.MainAxisAlignment.CENTER, spacing=20)
+    pdf.setFillColor(colors.black)
+    pdf.setFont("Helvetica-Bold", 14)
+    title_x = circle_x + circle_radius + 15  
+    title_y = circle_y - 5  
+    pdf.drawString(title_x, title_y, title)
 
-    def build(self):
-        self.controls = [
-            ft.Container(
-                content=self.step_details(),
-                padding=20,
-                alignment=ft.alignment.center
-            ),
-            self.action_buttons()
-        ]
-        self.spacing = 20
-        self.expand = True
-        
-    
-    
-def main(page: ft.Page):
-    page.title = "Screen Capture"
-    page.theme_mode = "light"
-    page.window.width = 410
-    page.window.height = 600
-    
-    capture_page = CapturingPage(page)
-    page.add(capture_page)
+    # Move down after the container
+    y_position -= container_height + 20
 
+    # Description
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(80, y_position, description)
+    y_position -= 30
 
-ft.app(target=main)
+    # Add Screenshot (with Error Handling)
+    try:
+        pdf.drawInlineImage(screenshot_path, 80, y_position - 180, width=400, height=180)
+        y_position -= 200
+    except Exception as e:
+        pdf.setFillColor(colors.red)
+        pdf.drawString(80, y_position, f"Error loading image: {e}")
+        pdf.setFillColor(colors.black)
+        y_position -= 40
+
+    # Divider Line
+    pdf.line(50, y_position, page_width - 50, y_position)
+    y_position -= 40
+
+    # Page Break if Space is Low
+    if y_position < 150:
+        pdf.showPage()
+        y_position = page_height - 80
+
+pdf.save()
+print(f"PDF successfully created: {file_name}")

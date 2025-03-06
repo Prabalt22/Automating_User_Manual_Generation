@@ -1,4 +1,5 @@
 import pygetwindow as gw
+import time
 
 class WindowManager:
     def __init__(self):
@@ -15,7 +16,13 @@ class WindowManager:
         self.open_windows = list(set([title for title in self.open_windows if title]))
         
         
-        self.filtered_windows = self.get_clean_app_names()
+        # self.filtered_windows = self.get_clean_app_names()
+        
+        # Filter out system windows
+        self.filtered_windows = [
+            title.split(" - ")[-1] for title in self.open_windows 
+            if not any(system_window in title for system_window in self.SYSTEM_WINDOWS)
+        ]
 
     def get_clean_app_names(self):
         clean_names = []
@@ -38,14 +45,11 @@ class WindowManager:
     def focus_window(self, window_title):
         windows = gw.getWindowsWithTitle(window_title)
         if windows:
-            print(windows)
             window = windows[0]
-            print(windows[0])
             try:
                 if window.isMinimized:
-                    window.restore()  
-                else:
                     window.restore()
+                    time.sleep(0.1)  
                 # window.bringToFront()  
             except Exception as e:
                 print(f"Error focusing on window: {e}")

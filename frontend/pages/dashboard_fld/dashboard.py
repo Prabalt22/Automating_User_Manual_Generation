@@ -1,130 +1,91 @@
 import flet as ft
-import os
+from frontend.pages.dashboard_fld.components.image_operations import ImageOperations
+from frontend.pages.dashboard_fld.components.side_toolbar import SideToolbar
+from frontend.pages.dashboard_fld.components.step_details import StepDetails
+from frontend.pages.dashboard_fld.components.steps_list import StepsList
+from frontend.pages.dashboard_fld.components.top_bar import TopBar
 from backend.get_data_db import get_data
-   
+
 class StepGuideCreator(ft.Column):
-    def __init__(self, page, curr_guide_name):
+    def __init__(self, page, curr_guide_name, steps_data):
         super().__init__()
         self.page = page
-        self.setting_cursor_name, self.setting_screenshot_dir = get_data()
+        self.curr_guide_name = curr_guide_name
+        self.steps_data = steps_data
         
-        # self.screenshot_dir = r"C:\Users\Prabal Arvind Tiwari\OneDrive\Desktop\User_Manuel\backend\screenshots\{curr_guide_name}"
-        self.screenshot_dir = f"{self.setting_screenshot_dir}\\{curr_guide_name}"
-        self.cnt = self.get_file_count()
+        self.cnt = len(steps_data)
+        self.selected_image_index = None
+        self.image_containers = []
+        self.create_image_containers()
+        
         self.image_column = ft.Column(
-                [
-                ft.Image(
-                        src=f"{self.setting_screenshot_dir}\\{curr_guide_name}\\screenshot_{i}.png",
-                        width=500,
-                        height=500,
-                        fit=ft.ImageFit.CONTAIN,
-                    ) for i in range(1, self.cnt+1)
-                ],
-                 alignment=ft.alignment.center
+            self.image_containers,
+            alignment=ft.alignment.center
         )
         
+        # Initialize components
+        self.image_operations = ImageOperations(self)
+        self.top_bar_component = TopBar(self)
+        self.side_toolbar_component = SideToolbar()
+        self.steps_list_component = StepsList(self)
+        self.step_details_component = StepDetails(self)
         
-    def get_file_count(self):
-        if not os.path.exists(self.screenshot_dir):
-            return 0 
-        existing_files = os.listdir(self.screenshot_dir)
-        screenshot_count = len([file for file in existing_files if file.endswith('.png')])
-        return screenshot_count
-       
-    def top_bar(self):
-        return ft.Container(
-            content=ft.Row(
-                [
-                    ft.IconButton(icon=ft.Icons.MENU, tooltip="Menu"),
-                    ft.Text("Untitled - " + "07-02-2025", size=16, weight=ft.FontWeight.BOLD),
-                    ft.Row(
-                        [
-                            ft.ElevatedButton(
-                                "Export PDF",
-                                icon=ft.Icons.DOWNLOAD,
-                                style=ft.ButtonStyle(
-                                    bgcolor=ft.Colors.GREEN,
-                                    color=ft.Colors.WHITE,
-                                )
-                            ),
-                            ft.Dropdown(
-                                width=100,
-                                options=[
-                                    ft.dropdown.Option("Red"),
-                                    ft.dropdown.Option("Green"),
-                                    ft.dropdown.Option("Blue"),
-                                ],
-                            ),
-                        ],
-                        spacing=10,
-                    )
-                ],
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            ),
-            padding=10,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.border.only(bottom=ft.BorderSide(1, ft.Colors.BLACK12)),
-        )
-
-    def side_toolbar(self):
-        tools = [
-            ft.IconButton(icon=ft.Icons.VIEW_LIST, tooltip="List View"),
-            ft.IconButton(icon=ft.Icons.ARROW_BACK, tooltip="Back"),
-            ft.IconButton(icon=ft.Icons.ARROW_FORWARD, tooltip="Forward"),
-            ft.IconButton(icon=ft.Icons.MOUSE, tooltip="Select"),
-            ft.IconButton(icon=ft.Icons.CHAT, tooltip="Comment"),
-            ft.IconButton(icon=ft.Icons.TEXT_FIELDS, tooltip="Text"),
-            ft.IconButton(icon=ft.Icons.PAN_TOOL, tooltip="Hand Tool"),
-            ft.IconButton(icon=ft.Icons.TIMER, tooltip="Timer"),
-            ft.IconButton(icon=ft.Icons.WATER_DROP, tooltip="Draw"),
-            ft.IconButton(icon=ft.Icons.EDIT, tooltip="Edit"),
-            ft.IconButton(icon=ft.Icons.CREATE, tooltip="Pencil"),
-            ft.IconButton(icon=ft.Icons.SCREENSHOT_MONITOR, tooltip="Screenshot"),
-            ft.IconButton(icon=ft.Icons.REFRESH, tooltip="Reset"),
-            ft.IconButton(icon=ft.Icons.SYNC, tooltip="Sync"),
-        ]
+    def create_image_containers(self):
+        self.image_containers = []
+        for i in range(1, self.cnt+1):
+            image = ft.Image(
+                src=f"{self.steps_data[i]['screenshot_path']}",
+                width=500,
+                height=500,
+                fit=ft.ImageFit.CONTAIN,
+            )
+            
+            # Create a container that can be styled differently when selected
+            container = ft.Container(
+                content=image,
+                border_radius=10,
+                padding=5,
+                data=i,  # Store the index in the data attribute
+                on_click=self.on_image_click,
+            )
+            self.image_containers.append(container)
+    
+    def on_image_click(self, e):
+        clicked_index = e.control.data
         
-        return ft.Container(
-            content=ft.Column(
-                controls=tools,
-                spacing=5,
-            ),
-            width=50,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.border.only(right=ft.BorderSide(1, ft.Colors.BLACK12)),
-        )
-
-    def steps_list(self):
-        return ft.Container(
-            content=ft.Column(
-                controls=[
-                    ft.Container(
-                        content=ft.ElevatedButton(
-                            "Add step",
-                            icon=ft.Icons.ADD,
-                            style=ft.ButtonStyle(
-                                bgcolor=ft.Colors.WHITE,
-                                color=ft.Colors.BLACK,
-                            ),
-                        ),
-                        padding=10,
-                    ),
-                    ft.ListView(
-                        controls=[
-                            ft.ListTile(
-                                leading=ft.Text(f"{i}."),
-                                title=ft.Text("hello world" if i == 1 else f"Step {i}"),
-                                dense=True,
-                            ) for i in range(1, 4+1)
-                        ],
-                        spacing=2,
-                    ),
-                ],
-            ),
-            width=200,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.border.only(right=ft.BorderSide(1, ft.Colors.BLACK12)),
-        )
+        # Deselect all images first
+        for container in self.image_containers:
+            container.border = None
+            container.bgcolor = None
+        
+        # If clicking on already selected image, deselect it
+        if self.selected_image_index == clicked_index:
+            self.selected_image_index = None
+        else:
+            # Select the clicked image
+            self.selected_image_index = clicked_index
+            e.control.border = ft.border.all(3, ft.Colors.BLUE)
+            e.control.bgcolor = ft.Colors.BLUE_100
+            
+            # Update the step details panel with the selected image details
+            title = self.steps_data[clicked_index]["title"]
+            description = self.steps_data[clicked_index]["description"]
+            self.update_step_details(clicked_index, title, description)
+        
+        # Update the image operation controls visibility
+        self.image_operations.update_image_operations_visibility()
+        
+        # Update the UI
+        self.page.update()
+    
+    def update_step_details(self, clicked_index, current_index_title, current_index_description):
+        
+        self.step_details_component.update_details(clicked_index, current_index_title, current_index_description)
+    
+    def select_step(self, index):
+        """Handle step selection from the steps list"""
+        # Simulate a click on the corresponding image container
+        pass
 
     def main_content(self):
         return ft.Container(
@@ -160,74 +121,31 @@ class StepGuideCreator(ft.Column):
                         padding=10,
                         width=400
                     ),
+                    # Add image operation controls before the images
+                    self.image_operations.controls,
                     self.image_column
                 ],
                 scroll="always",
+                expand=True
             ),
             expand=True,
             bgcolor="#F0F0F0",
         )
 
-    def step_details(self):
-        return ft.Container(
-            content=ft.Column(
-                [
-                    ft.Row(
-                        [
-                            ft.Text("Step Details", size=16, weight=ft.FontWeight.BOLD),
-                            ft.IconButton(icon=ft.Icons.KEYBOARD_ARROW_UP),
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    ),
-                    ft.Dropdown(
-                        options=[
-                            ft.dropdown.Option("Red"),
-                            ft.dropdown.Option("Green"),
-                            ft.dropdown.Option("Blue"),
-                        ],
-                        width=200,
-                    ),
-                    ft.TextField(
-                        label="Title",
-                        value="hello world",
-                    ),
-                    ft.TextField(
-                        label="Description",
-                        multiline=True,
-                        min_lines=3,
-                    ),
-                ],
-                spacing=20,
-            ),
-            width=300,
-            padding=20,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.border.only(left=ft.BorderSide(1, ft.Colors.BLACK12)),
-        )
-
     def build(self):
         self.controls = [
-            self.top_bar(),
+            self.top_bar_component,
             ft.Row(
                 [
-                    self.side_toolbar(),
-                    self.steps_list(),
+                    self.side_toolbar_component,
+                    self.steps_list_component.build(),
                     self.main_content(),
-                    self.step_details(),
+                    self.step_details_component,
                 ],
                 vertical_alignment=ft.CrossAxisAlignment.START,
                 expand=True,
             ),
         ]
         self.expand = True
-        self.page.window.width =  900  
-        self.page.window.height = 600 
-        
-
-def main(page: ft.Page):
-    page.theme_mode = "light"
-    page.add(
-        StepGuideCreator(page)
-    )
-
-# ft.app(target=main) 
+        # self.page.window.width = 800
+        # self.page.window.height = 600

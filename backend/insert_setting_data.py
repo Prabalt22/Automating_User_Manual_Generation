@@ -7,8 +7,8 @@ def insert_data(data):
     
     C.execute(
         """
-        INSERT OR REPLACE INTO setting_data (id, cursor_name, image_storage_dir)
-        VALUES (1, ?, ?) 
+        INSERT OR REPLACE INTO setting_data (id, cursor_name, image_storage_dir, color_R, color_G, color_B)
+        VALUES (1, ?, ?, ?, ?, ?) 
         """,
         data
     )

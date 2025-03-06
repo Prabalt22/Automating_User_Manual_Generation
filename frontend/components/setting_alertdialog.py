@@ -23,8 +23,7 @@ class CheckSetting(ft.Column):
                         width=300,height=150,
                         fit=ft.ImageFit.CONTAIN ),
                     ft.Text(
-                        "An active internet connection is required to\ncomplete this operation."+
-                        "Please recheck your\nnetwork settings and try again.",
+                        "PLS Check Setting Panel to Update the Image Download Folder",
                             width=300,
                             text_align=ft.TextAlign.CENTER 
                 )],
@@ -51,17 +50,10 @@ class CheckSetting(ft.Column):
         
         self.page.overlay.append(self.dialog)
         self.dialog.open = True
-        self.page.update()
-
-        
+        self.page.update()    
     
       
     def handle_close(self):
         self.dialog.open = False
         self.page.update()
         
-        
-
-    
-
-    

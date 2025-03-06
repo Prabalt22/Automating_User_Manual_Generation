@@ -19,7 +19,8 @@ def create_table():
     (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         cursor_name TEXT NOT NULL,
-        image_storage_dir TEXT
+        image_storage_dir TEXT,
+        color_RGB TEXT
     )
     """
     C.execute(query)

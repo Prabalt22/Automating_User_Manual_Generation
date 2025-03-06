@@ -16,7 +16,7 @@ class CreatGuide(ft.Column):
         current_date = datetime.now()
         
         # formate the date
-        formate_date = f"Untitled - {current_date.strftime('%d-%m-%y')}"
+        formate_date = f"Untitled-{current_date.strftime('%d-%m-%y')}"
         
         return formate_date     
           
