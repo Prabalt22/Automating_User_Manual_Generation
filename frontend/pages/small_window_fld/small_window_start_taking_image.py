@@ -91,7 +91,7 @@ class CapturingPage(ft.Column):
         
     def stop_mouse_listener(self, e):
         self.mouse_listener.end()
-        print("c1hi")
+        print("stop listening")
     
     def title_edit(self, e):
         self.steps_data[self.steps]["title"] = e.control.value

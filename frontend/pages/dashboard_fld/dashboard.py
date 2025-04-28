@@ -4,7 +4,7 @@ from frontend.pages.dashboard_fld.components.side_toolbar import SideToolbar
 from frontend.pages.dashboard_fld.components.step_details import StepDetails
 from frontend.pages.dashboard_fld.components.steps_list import StepsList
 from frontend.pages.dashboard_fld.components.top_bar import TopBar
-from backend.get_data_db import get_data
+# from backend.get_data_db import get_data
 
 class StepGuideCreator(ft.Column):
     def __init__(self, page, curr_guide_name, steps_data):
@@ -147,6 +147,7 @@ class StepGuideCreator(ft.Column):
             ),
         ]
         self.expand = True
-        # self.page.window.width = 800
-        # self.page.window.height = 600 git add . git commit -m "second commit" git push origin main
+        self.page.window.width = 1000
+        self.page.window.height = 700 
+        # git add . git commit -m "second commit" git push origin main
 

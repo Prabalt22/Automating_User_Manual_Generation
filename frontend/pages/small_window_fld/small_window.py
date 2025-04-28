@@ -81,7 +81,7 @@ class ScreenshotApp(ft.Column):
         
     def stop_mouse_listener(self, e):
         self.mouse_listener.end()
-        print("chi")   
+        print("end listening")   
     
     def build(self):
         self.controls = [ 
