@@ -260,6 +260,56 @@ This separation helped keep the application organized and easier to maintain.
 
 ---
 
+
+## How to Run the Project
+
+### 1. Clone or Download the Project
+
+Download or clone this repository to your local machine.
+
+### 2. Open the Project Directory
+
+Open PowerShell or Command Prompt and navigate to the project folder:
+
+```powershell
+cd path\to\User_Manuel
+```
+
+### 3. Create and Activate the Virtual Environment
+
+If a virtual environment is already included:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+If you need to create one:
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+### 4. Install Required Dependencies
+
+Install the required Python packages:
+
+```powershell
+pip install -r requirements.txt
+```
+
+### 5. Run the Application
+
+After activating the virtual environment, run:
+
+```powershell
+flet run .\main.py
+```
+
+The application should now start.
+
+> **Note:** Make sure the virtual environment is activated before running the project.
+
 ## Project Structure Concept
 
 ```text
